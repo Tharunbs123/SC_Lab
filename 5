@@ -1,0 +1,53 @@
+import numpy as np
+
+num_ants, num_iter, rho, Q = 2, 5, 100, 5  # Number of ants, iterations, evaporation rate, pheromone factor
+
+dist = np.array([[0,10,17,10], [10,0,10,10], [17,10,0,10], [10,10,10,0]])
+n = len(dist)
+pher = np.ones((n, n))
+
+def cost(path):
+    return sum(dist[path[i], path[i+1]] for i in range(n-1)) + dist[path[-1], path[0]]
+
+def update(pher, sols):
+    for path in sols:
+        for i in range(n):
+            pher[path[i], path[(i+1) % n]] += Q / cost(path)  # Pheromone deposit
+    pher *= (1 - rho)  # Evaporation of pheromone
+
+def aco():
+    best_path, best_cost = None, float('inf')
+    for _ in range(num_iter):
+        sols = [np.random.permutation(n) for _ in range(num_ants)]  # Generate solutions
+        update(pher, sols)  # Update pheromones
+        for path in sols:
+            c = cost(path)
+            if c < best_cost:
+                best_path, best_cost = path, c  # Update best solution
+    return best_path, best_cost
+
+print("Best solution:", *aco())
+import numpy as np
+class PSO:
+    def __init__(self, dim, bounds, func, c1=0.8, c2=0.4, particles=20, iters=100):
+        self.dim, self.bounds, self.func, self.c1, self.c2, self.particles, self.iters = dim, bounds, func, c1, c2, particles, iters
+    def optimize(self):
+        loc = np.random.uniform(self.bounds[:, 0], self.bounds[:, 1], (self.particles, self.dim))
+        vel = pbest = loc.copy()
+        fit = self.func(loc)
+        gbest = loc[np.argmin(fit)]
+        for _ in range(self.iters):
+            r = np.random.rand(self.particles, 2)
+            vel = 0.9 * vel + self.c1 * r[:, 0:1] * (pbest - loc) + self.c2 * r[:, 1:2] * (gbest - loc)
+            loc = np.clip(loc + vel, self.bounds[:, 0], self.bounds[:, 1])
+            fit_new = self.func(loc)
+            pbest[fit_new < fit], fit = loc[fit_new < fit], np.minimum(fit, fit_new)
+            gbest = loc[np.argmin(fit)] if np.min(fit) < self.func(gbest) else gbest
+        return gbest, self.func(gbest), np.min(fit)
+
+def f(x): return -x**2 + 5*x + 20
+bounds = np.array([[10, 10]])
+
+pso = PSO(1, bounds, f, particles=9, iters=50)
+best_solution, best_value, best_cost = pso.optimize()
+print(f"Best Solution: {best_solution}, Function Value: {best_value}")
