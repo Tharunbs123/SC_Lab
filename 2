@@ -1,0 +1,38 @@
+fuzzy_set = {'x': 4.5, 'y': 3.5, 'z':4.33}
+
+lambda_value = 4
+
+def lambda_cut(fuzzy_set, lambda_value):
+    cut_set = []
+
+    for element, membership_value in fuzzy_set.items():
+        if membership_value >= lambda_value:
+            cut_set.append(element)
+
+    return cut_set
+
+result = lambda_cut(fuzzy_set, lambda_value)
+print(f"Elements in the fuzzy set with membership >= {lambda_value}: {result}")
+
+def mean_of_maximum(fuzzy_set):
+    max_membership = max(fuzzy_set.values())
+
+    max_x_values = [x for x, mu in fuzzy_set.items() if mu == max_membership]
+
+    return sum(max_x_values) / len(max_x_values)
+
+fuzzy_set = {1: 0.2, 2: 0.5, 3: 0.8, 4: 1.0, 5: 1.0, 6: 0.7, 7: 0.3}
+
+result = mean_of_maximum(fuzzy_set)
+
+print(f"Mean of Maximum (MOM) defuzzified value: {result}")
+
+def center_of_gravity(fuzzy_set):
+    numerator = sum(x * mu for x, mu in fuzzy_set.items())
+
+    denominator = sum(fuzzy_set.values())
+
+    return numerator / denominator if denominator != 0 else 0
+fuzzy_set = {1: 0.2, 2: 0.5, 3: 0.8, 4: 1.0, 5: 0.7}
+result = center_of_gravity(fuzzy_set)
+print(f"Center of Gravity (COG) defuzzified value: {result}")
